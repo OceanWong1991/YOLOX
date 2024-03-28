@@ -8,7 +8,11 @@ from yolox.exp import Exp as MyExp
 class Exp(MyExp):
     def __init__(self):
         super(Exp, self).__init__()
-        self.num_classes = 20
+        self.num_classes = 9
+        # opt model m
+        # self.depth = 0.67
+        # self.width = 0.75
+        # opt model s
         self.depth = 0.33
         self.width = 0.50
         self.warmup_epochs = 1
@@ -18,6 +22,10 @@ class Exp(MyExp):
         self.mixup_prob = 1.0
         self.hsv_prob = 1.0
         self.flip_prob = 0.5
+        # OPT Change Train Name
+        self.data_dir = '/home/glint/xzwang/data/0327'
+        self.train_file = 'train.txt'
+        self.val_file = 'val.txt'
 
         self.exp_name = os.path.split(os.path.realpath(__file__))[1].split(".")[0]
 
@@ -25,8 +33,9 @@ class Exp(MyExp):
         from yolox.data import VOCDetection, TrainTransform
 
         return VOCDetection(
-            data_dir=os.path.join(get_yolox_datadir(), "VOCdevkit"),
-            image_sets=[('2007', 'trainval'), ('2012', 'trainval')],
+            data_dir=self.data_dir,
+            image_list_file=self.train_file,
+            # image_sets=[('2007', 'trainval'), ('2012', 'trainval')],
             img_size=self.input_size,
             preproc=TrainTransform(
                 max_labels=50,
@@ -41,8 +50,10 @@ class Exp(MyExp):
         legacy = kwargs.get("legacy", False)
 
         return VOCDetection(
-            data_dir=os.path.join(get_yolox_datadir(), "VOCdevkit"),
-            image_sets=[('2007', 'test')],
+            data_dir=self.data_dir,
+            image_list_file=self.val_file,
+            # data_dir=os.path.join(get_yolox_datadir(), "VOCdevkit"),
+            # image_sets=[('2007', 'test')],
             img_size=self.test_size,
             preproc=ValTransform(legacy=legacy),
         )
