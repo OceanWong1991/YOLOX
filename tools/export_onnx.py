@@ -16,8 +16,9 @@ from yolox.utils import replace_module
 
 def make_parser():
     parser = argparse.ArgumentParser("YOLOX onnx deploy")
+    # OPT Change name
     parser.add_argument(
-        "--output-name", type=str, default="yolox.onnx", help="output name of models"
+        "--output-name", type=str, default="yolox_s_bs_1.onnx", help="output name of models"
     )
     parser.add_argument(
         "--input", default="images", type=str, help="input node name of onnx model"
@@ -28,6 +29,7 @@ def make_parser():
     parser.add_argument(
         "-o", "--opset", default=11, type=int, help="onnx opset version"
     )
+    # OPT Change BS
     parser.add_argument("--batch-size", type=int, default=1, help="batch size")
     parser.add_argument(
         "--dynamic", action="store_true", help="whether the input shape should be dynamic or not"
@@ -36,19 +38,20 @@ def make_parser():
     parser.add_argument(
         "-f",
         "--exp_file",
-        default=None,
+        default="/home/glint/xzwang/code/YOLOX/exps/example/yolox_voc/yolox_voc_s.py",
         type=str,
         help="experiment description file",
     )
     parser.add_argument("-expn", "--experiment-name", type=str, default=None)
-    parser.add_argument("-n", "--name", type=str, default=None, help="model name")
-    parser.add_argument("-c", "--ckpt", default=None, type=str, help="ckpt path")
+    parser.add_argument("-n", "--name", type=str, default='yolox-s', help="model name")
+    parser.add_argument("-c", "--ckpt", default='/home/glint/xzwang/code/YOLOX/YOLOX_outputs/yolox_voc_s/best_ckpt.pth', type=str, help="ckpt path")
     parser.add_argument(
         "opts",
         help="Modify config options using the command-line",
         default=None,
         nargs=argparse.REMAINDER,
     )
+    # opt trt
     parser.add_argument(
         "--decode_in_inference",
         action="store_true",
