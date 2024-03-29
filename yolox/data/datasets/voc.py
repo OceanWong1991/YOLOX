@@ -102,7 +102,6 @@ class VOCDetection(CacheDataset):
         self,
         data_dir,
         image_list_file="train_yolox.txt",
-        # image_sets=[("2007", "trainval"), ("2012", "trainval")],
         img_size=(416, 416),
         preproc=None,
         target_transform=AnnotationTransform(),
@@ -111,7 +110,6 @@ class VOCDetection(CacheDataset):
         cache_type="ram",
     ):
         self.root = data_dir
-        # self.image_set = image_sets
         self.img_size = img_size
         self.preproc = preproc
         self.target_transform = target_transform
@@ -122,10 +120,7 @@ class VOCDetection(CacheDataset):
         self._classes = VOC_CLASSES
         
         self.image_file = os.path.join(self.root, image_list_file)
-        # self.val_file = os.path.join(self.root, "val_yolox.txt")
-        # self.cats = [
-        #     {"id": idx, "name": val} for idx, val in enumerate(VOC_CLASSES)
-        # ]
+
         self.class_ids = list(range(len(VOC_CLASSES)))
         self.ids = list()
 
@@ -139,31 +134,7 @@ class VOCDetection(CacheDataset):
             (self._imgpath % self.ids[i]).split(self.root + "/")[1]
             for i in range(self.num_imgs)
         ]
-        # * -----------------------------------------------
-        # self.name = dataset_name
-        # self._annopath = os.path.join("%s", "Annotations", "%s.xml")
-        # self._imgpath = os.path.join("%s", "JPEGImages", "%s.jpg")
-        # self._classes = VOC_CLASSES
-        # self.cats = [
-        #     {"id": idx, "name": val} for idx, val in enumerate(VOC_CLASSES)
-        # ]
-        # self.class_ids = list(range(len(VOC_CLASSES)))
-        # self.ids = list()
-        # for (year, name) in image_sets:
-        #     self._year = year
-        #     rootpath = os.path.join(self.root, "VOC" + year)
-        #     for line in open(
-        #         os.path.join(rootpath, "ImageSets", "Main", name + ".txt")
-        #     ):
-        #         self.ids.append((rootpath, line.strip()))
-        # self.num_imgs = len(self.ids)
 
-        # self.annotations = self._load_coco_annotations()
-
-        # path_filename = [
-        #     (self._imgpath % self.ids[i]).split(self.root + "/")[1]
-        #     for i in range(self.num_imgs)
-        # ]
         super().__init__(
             input_dimension=img_size,
             num_imgs=self.num_imgs,
