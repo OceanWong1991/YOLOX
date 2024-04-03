@@ -143,8 +143,6 @@ class VOCDetection(CacheDataset):
         #     (self._imgpath % self.im_files[i]).split(self.root + "/")[1]
         #     for i in range(self.num_imgs)
         # ]
-        # * File name
-        self.sa, self.sb = f'{os.sep}images{os.sep}', f'{os.sep}anns{os.sep}'  # /images/, /anns/ substrings
 
         super().__init__(
             input_dimension=img_size,
@@ -171,7 +169,7 @@ class VOCDetection(CacheDataset):
 
     def load_anno_from_ids(self, index):
         img_id = self.im_files[index]
-        ann_path = self.sb.join(img_id.rsplit(self.sa, 1)).rsplit('.', 1)[0] + '.xml'
+        ann_path = f'{os.sep}anns{os.sep}'.join(img_id.rsplit(f'{os.sep}images{os.sep}', 1)).rsplit('.', 1)[0] + '.xml'
         # target = ET.parse(self._annopath % img_id).getroot()
         target = ET.parse(ann_path).getroot()
 
@@ -244,7 +242,7 @@ class VOCDetection(CacheDataset):
 
         all_boxes[class][image] = [] or np.array of shape #dets x 5
         """
-        # self._write_voc_results_file(all_boxes)
+        self._write_voc_results_file(all_boxes)
         IouTh = np.linspace(
             0.5, 0.95, int(np.round((0.95 - 0.5) / 0.05)) + 1, endpoint=True
         )
@@ -277,7 +275,7 @@ class VOCDetection(CacheDataset):
             filename = self._get_voc_results_file_template().format(cls)
             with open(filename, "wt") as f:
                 for im_ind, index in enumerate(self.im_files):
-                    index = index[1]
+                    # index = index
                     dets = all_boxes[cls_ind][im_ind]
                     if dets == []:
                         continue
@@ -300,6 +298,7 @@ class VOCDetection(CacheDataset):
         # imagesetfile = os.path.join(rootpath, "ImageSets", "Main", name + ".txt")
         rootpath = os.path.join(self.root)
         name = self.name
+        # TODO---------------
         annopath = os.path.join(rootpath, "anns", "{:s}.xml")
 
         # OPT

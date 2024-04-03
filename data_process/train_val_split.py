@@ -47,7 +47,7 @@ def gen_train_val_list_with_path(src, des):
     files = glob.glob(str(path / '**' / 'images' / '*.jpg'), recursive=True)
 
     # OPT change test size if you want to reset tran val data sise
-    X_train, X_val = train_test_split(files, test_size = 0.12, random_state = 1991)
+    X_train, X_val = train_test_split(files, test_size = 0.0002, random_state = 1991)
     print('train data set length....', len(X_train))
     print('val data set length....', len(X_val))
 
