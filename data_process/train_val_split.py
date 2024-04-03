@@ -36,10 +36,28 @@ from tqdm import tqdm
 from pathlib import Path
 from sklearn.model_selection import train_test_split
 
-
 def check_mkdir(path):
     if not os.path.exists(path):
         os.makedirs(path)
+
+
+def gen_train_val_list_with_path(src, des):
+    check_mkdir(des)
+    path = Path(src)
+    files = glob.glob(str(path / '**' / 'images' / '*.jpg'), recursive=True)
+
+    # OPT change test size if you want to reset tran val data sise
+    X_train, X_val = train_test_split(files, test_size = 0.12, random_state = 1991)
+    print('train data set length....', len(X_train))
+    print('val data set length....', len(X_val))
+
+    with open(os.path.join(des, 'train.txt'), 'w') as f1:
+        for i in X_train:
+            f1.write(i + '\n')
+
+    with open(os.path.join(des, 'val.txt'), 'w') as f1:
+        for i in X_val:
+            f1.write(i + '\n')
 
 def gen_train_val_list(src, des):
     check_mkdir(des)
@@ -75,8 +93,7 @@ def moveFile(source, des, type):
             shutil.copyfile(p, os.path.join(des, imgname))
             shutil.copyfile(txt, os.path.join(des, txtname))
 
-
 if __name__ == '__main__':
     src = '/home/glint/xzwang/data/0327'
     des = '/home/glint/xzwang/data/0327'
-    gen_train_val_list(src, des)
+    gen_train_val_list_with_path(src, des)

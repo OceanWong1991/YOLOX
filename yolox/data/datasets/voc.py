@@ -115,32 +115,44 @@ class VOCDetection(CacheDataset):
         self.target_transform = target_transform
         # * -----------------------------------------------
         self.name = dataset_name
-        self._annopath = os.path.join("%s", "anns", "%s.xml")
-        self._imgpath = os.path.join("%s", "images", "%s.jpg")
+        # self._annopath = os.path.join("%s", "anns", "%s.xml")
+        # self._imgpath = os.path.join("%s", "images", "%s.jpg")
         self._classes = VOC_CLASSES
         
         self.image_file = os.path.join(self.root, image_list_file)
 
         self.class_ids = list(range(len(VOC_CLASSES)))
-        self.ids = list()
+        # self.im_files = list()
 
-        for line in open(self.image_file):
-            self.ids.append((self.root, line.strip()))
-        self.num_imgs = len(self.ids)
+        # for line in open(self.image_file):
+        #     self.im_files.append((self.root, line.strip()))
+        f = []  # image files
+        with open(self.image_file) as t:
+            t = t.read().strip().splitlines()
+            f += [x for x in t]  # to global path
+        
+        # * --------------
+        self.im_files = sorted(x.replace('/', os.sep) for x in f)
+        
+        # * --------------
+        self.num_imgs = len(self.im_files)
 
         self.annotations = self._load_coco_annotations()
 
-        path_filename = [
-            (self._imgpath % self.ids[i]).split(self.root + "/")[1]
-            for i in range(self.num_imgs)
-        ]
+        # path_filename = [
+        #     (self._imgpath % self.im_files[i]).split(self.root + "/")[1]
+        #     for i in range(self.num_imgs)
+        # ]
+        # * File name
+        self.sa, self.sb = f'{os.sep}images{os.sep}', f'{os.sep}anns{os.sep}'  # /images/, /anns/ substrings
 
         super().__init__(
             input_dimension=img_size,
             num_imgs=self.num_imgs,
             data_dir=self.root,
             cache_dir_name=f"cache_{self.name}",
-            path_filename=path_filename,
+            # path_filename=path_filename,
+            path_filename=self.im_files,
             cache=cache,
             cache_type=cache_type
         )
@@ -150,10 +162,18 @@ class VOCDetection(CacheDataset):
 
     def _load_coco_annotations(self):
         return [self.load_anno_from_ids(_ids) for _ids in range(self.num_imgs)]
+    
+    def img2label_paths(img_paths):
+        # Define label paths as a function of image paths
+        sa, sb = f'{os.sep}images{os.sep}', f'{os.sep}labels{os.sep}'  # /images/, /labels/ substrings
+        return [sb.join(x.rsplit(sa, 1)).rsplit('.', 1)[0] + '.xml' for x in img_paths]
+
 
     def load_anno_from_ids(self, index):
-        img_id = self.ids[index]
-        target = ET.parse(self._annopath % img_id).getroot()
+        img_id = self.im_files[index]
+        ann_path = self.sb.join(img_id.rsplit(self.sa, 1)).rsplit('.', 1)[0] + '.xml'
+        # target = ET.parse(self._annopath % img_id).getroot()
+        target = ET.parse(ann_path).getroot()
 
         assert self.target_transform is not None
         res, img_info = self.target_transform(target)
@@ -180,10 +200,10 @@ class VOCDetection(CacheDataset):
         return resized_img
 
     def load_image(self, index):
-        img_id = self.ids[index]
-        img = cv2.imread(self._imgpath % img_id, cv2.IMREAD_COLOR)
-        assert img is not None, f"file named {self._imgpath % img_id} not found"
-
+        img_id = self.im_files[index]
+        # img = cv2.imread(self._imgpath % img_id, cv2.IMREAD_COLOR)
+        img = cv2.imread(img_id, cv2.IMREAD_COLOR)
+        assert img is not None, f"file named {img_id} not found"
         return img
 
     @cache_read_img(use_cache=True)
@@ -224,7 +244,7 @@ class VOCDetection(CacheDataset):
 
         all_boxes[class][image] = [] or np.array of shape #dets x 5
         """
-        self._write_voc_results_file(all_boxes)
+        # self._write_voc_results_file(all_boxes)
         IouTh = np.linspace(
             0.5, 0.95, int(np.round((0.95 - 0.5) / 0.05)) + 1, endpoint=True
         )
@@ -256,7 +276,7 @@ class VOCDetection(CacheDataset):
             print("Writing {} VOC results file".format(cls))
             filename = self._get_voc_results_file_template().format(cls)
             with open(filename, "wt") as f:
-                for im_ind, index in enumerate(self.ids):
+                for im_ind, index in enumerate(self.im_files):
                     index = index[1]
                     dets = all_boxes[cls_ind][im_ind]
                     if dets == []:
